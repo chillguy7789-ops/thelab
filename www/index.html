@@ -265,9 +265,9 @@ function parseTorrentTitle(raw) {
     const ep = epMatch ? parseInt(epMatch[1]) : null;
     // Anime name = everything before the episode dash
     let animeName = epMatch ? s.slice(0, epMatch.index).trim() : s.replace(/\s*[\[(].*$/, '').trim();
-    // Remove trailing season tag for search (S2 -> search base name, aniwatch has separate entries)
-    // Keep S2 in name since aniwatch might need it
-    return { animeName, ep };
+    // Strip trailing season tag e.g. "S2", "Season 2", "2nd Season" for cleaner search
+    const searchName = animeName.replace(/\s+(S\d+|Season\s*\d+|\d+(?:st|nd|rd|th)\s+Season)$/i, '').trim();
+    return { animeName, searchName, ep };
 }
 
 // ── Play: resolve via aniwatch API then mount HLS ─────────────────────────────
@@ -276,18 +276,22 @@ async function play(encodedTorrentUrl, encodedName, ext, encodedHash) {
     openOverlay(name);
     setMsg('// RESOLVING STREAM...');
 
-    const { animeName, ep } = parseTorrentTitle(name);
+    const { animeName, searchName, ep } = parseTorrentTitle(name);
 
     try {
-        // 1. Search aniwatch
+        // 1. Search aniwatch — try full name first, fallback to base name without season
         setMsg(`// SEARCHING\n${animeName}`);
-        const searchRes = await fetch(`${WORKER}/anime/api/v2/hianime/search?q=${encodeURIComponent(animeName)}&page=1`);
+        let searchRes = await fetch(`${WORKER}/anime/api/v2/hianime/search?q=${encodeURIComponent(searchName)}&page=1`);
+        if (!searchRes.ok) searchRes = await fetch(`${WORKER}/anime/api/v2/hianime/search?q=${encodeURIComponent(animeName)}&page=1`);
         if (!searchRes.ok) throw new Error(`search_${searchRes.status}`);
         const searchData = await searchRes.json();
 
         const animes = searchData.data?.animes ?? [];
         if (!animes.length) throw new Error('ANIME_NOT_FOUND');
-        const anime = animes[0];
+        // Prefer season-specific match if we have one, else take first result
+        const anime = animes.find(a => a.name.toLowerCase().includes(animeName.toLowerCase()))
+                   ?? animes.find(a => a.name.toLowerCase().includes(searchName.toLowerCase()))
+                   ?? animes[0];
 
         // 2. Get episode list
         setMsg(`// ${anime.name}\n// LOADING EPISODES...`);
