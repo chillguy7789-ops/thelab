@@ -1,1 +1,460 @@
-<html><body><h1>THE LAB</h1><p>Replace this with your index.html</p></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE LAB</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon: #ff0055;
+            --green: #00ff99;
+            --yellow: #ffcc00;
+            --bg: #030303;
+            --card: #080808;
+            --border: #141414;
+            --text: #999;
+            --font: 'IBM Plex Mono', monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; }
+        body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; display: flex; flex-direction: column; }
+
+        /* ── Header ── */
+        .header {
+            padding: 12px 15px;
+            background: #050505;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .logo { color: var(--neon); font-weight: 700; font-size: 14px; letter-spacing: 4px; flex-shrink: 0; }
+        .search-wrap { flex: 1; display: flex; gap: 6px; min-width: 0; }
+        input {
+            flex: 1;
+            min-width: 0;
+            background: #0d0d0d;
+            border: 1px solid #1e1e1e;
+            border-radius: 0;
+            color: #fff;
+            padding: 10px 12px;
+            font-family: var(--font);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input:focus { border-color: #333; }
+        .btn {
+            background: var(--neon);
+            border: none;
+            color: #fff;
+            padding: 10px 16px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: opacity 0.1s;
+        }
+        .btn:active { opacity: 0.7; }
+        .btn.dim { background: #1a1a1a; color: #555; }
+
+        /* ── Category tabs ── */
+        .cat-row {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .cat-row::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            padding: 8px 14px;
+            font-family: var(--font);
+            font-size: 10px;
+            background: none;
+            border: none;
+            border-right: 1px solid var(--border);
+            color: #444;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, background 0.15s;
+        }
+        .cat-btn.active { color: var(--green); background: #060606; }
+        .cat-btn:active { background: #0d0d0d; }
+
+        /* ── Feed ── */
+        #feed { flex: 1; overflow-y: auto; }
+        #feed-grid { display: grid; gap: 1px; background: var(--border); }
+        .card {
+            background: var(--card);
+            padding: 14px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            transition: background 0.1s;
+        }
+        .card:active { background: #111; }
+        .card-info { flex: 1; min-width: 0; }
+        .card-name {
+            color: #ccc;
+            font-size: 11px;
+            line-height: 1.5;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        .card-sub { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .badge {
+            font-size: 9px;
+            padding: 2px 5px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .badge-mkv  { background: #1a0a00; color: #ff6600; border: 1px solid #2a1400; }
+        .badge-mp4  { background: #001a0a; color: var(--green); border: 1px solid #002a14; }
+        .badge-webm { background: #00081a; color: #00aaff; border: 1px solid #001028; }
+        .badge-unk  { background: #111; color: #555; border: 1px solid #1e1e1e; }
+        .card-size  { font-size: 10px; color: #444; }
+        .card-right { flex-shrink: 0; text-align: right; }
+        .seeders    { color: var(--green); font-size: 11px; font-weight: 700; }
+        .leechers   { color: #ff4444; font-size: 9px; }
+        .empty { padding: 30px 20px; color: #333; font-size: 12px; line-height: 2; }
+
+        /* ── Load more ── */
+        #load-more-wrap { padding: 15px; display: none; }
+
+        /* ── Overlay ── */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        #overlay.active { display: flex; }
+        .ov-bar {
+            padding: 10px 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #050505;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        #v-name {
+            flex: 1;
+            font-size: 10px;
+            color: var(--neon);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        #player-cont {
+            flex: 1;
+            position: relative;
+            display: flex;
+            background: #000;
+            overflow: hidden;
+        }
+        #player-cont video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #msg {
+            margin: auto;
+            font-size: 11px;
+            color: var(--green);
+            text-align: center;
+            line-height: 2.2;
+            padding: 24px;
+            white-space: pre-line;
+            max-width: 340px;
+        }
+        #msg .err  { color: var(--neon); }
+        #msg .warn { color: var(--yellow); }
+        #msg .hint { color: #444; font-size: 10px; margin-top: 8px; display: block; }
+        .ov-stats {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.88);
+            padding: 4px 8px;
+            border: 1px solid #1e1e1e;
+            color: var(--green);
+            font-size: 10px;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">THE LAB</div>
+    <div class="search-wrap">
+        <input type="text" id="query" placeholder="Search nyaa..." onkeydown="if(event.key==='Enter')doSearch()">
+        <button class="btn" onclick="doSearch()">GO</button>
+    </div>
+</div>
+
+<div class="cat-row">
+    <button class="cat-btn active" data-cat="anime_eng" onclick="setCat(this)">ANIME</button>
+    <button class="cat-btn"        data-cat="all"       onclick="setCat(this)">ALL</button>
+</div>
+
+<div id="feed">
+    <div id="feed-grid">
+        <div class="empty">// READY<br>// SEARCH POWERED BY NYAA.SI<br>// ALL REQUESTS ROUTE THROUGH YOUR WORKER</div>
+    </div>
+    <div id="load-more-wrap">
+        <button class="btn dim" style="width:100%;" onclick="loadMore()">LOAD MORE</button>
+    </div>
+</div>
+
+<div id="overlay">
+    <div class="ov-bar">
+        <span id="v-name">LOADING...</span>
+        <button class="btn" style="background:#1a1a1a;padding:7px 13px;font-size:11px;" onclick="closeOverlay()">EXIT</button>
+    </div>
+    <div id="player-cont">
+        <div id="msg">INITIALIZING...</div>
+    </div>
+    <div id="ov-stats" class="ov-stats" style="display:none;"></div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const WORKER = 'https://tiny-fire-3903.zaidmir129.workers.dev';
+// ─────────────────────────────────────────────────────────────────────────────
+
+let currentCat  = 'anime_eng';
+let currentPage = 1;
+let currentQuery = '';
+let isLoading   = false;
+
+
+// ── Category ──────────────────────────────────────────────────────────────────
+function setCat(btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    if (currentQuery) doSearch();
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+async function doSearch() {
+    const q = document.getElementById('query').value.trim();
+    if (!q || isLoading) return;
+    currentQuery = q;
+    currentPage  = 1;
+    await fetchResults(true);
+}
+
+async function loadMore() {
+    if (!currentQuery || isLoading) return;
+    currentPage++;
+    await fetchResults(false);
+}
+
+async function fetchResults(replace) {
+    if (isLoading) return;
+    isLoading = true;
+
+    const grid = document.getElementById('feed-grid');
+    const lmw  = document.getElementById('load-more-wrap');
+
+    if (replace) {
+        grid.innerHTML = `<div class="empty">// SEARCHING ANIMETOSHO...</div>`;
+        lmw.style.display = 'none';
+    }
+
+    try {
+        const res  = await fetch(`${WORKER}/search?q=${encodeURIComponent(currentQuery)}&page=${currentPage}&cat=${currentCat}`);
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+        const results = data.results ?? [];
+
+        if (!results.length && replace) {
+            grid.innerHTML = `<div class="empty">// NO_RESULTS</div>`;
+            isLoading = false; return;
+        }
+
+        if (replace) grid.innerHTML = '';
+        grid.insertAdjacentHTML('beforeend', results.map(r => renderCard(r)).join(''));
+        lmw.style.display = results.length >= 10 ? 'block' : 'none';
+    } catch (e) {
+        if (replace) grid.innerHTML = `<div class="empty"><span style="color:var(--neon)">// ERR: ${e.message}</span></div>`;
+    }
+
+    isLoading = false;
+}
+
+function renderCard(r) {
+    const ext   = r.ext || 'mkv';
+    const bClass = ext === 'mp4' ? 'badge-mp4' : ext === 'webm' ? 'badge-webm' : ext === 'mkv' ? 'badge-mkv' : 'badge-unk';
+    const safe  = r.title.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    const tUrl  = encodeURIComponent(r.torrentUrl);
+    return `
+    <div class="card" onclick="play('${tUrl}','${encodeURIComponent(safe)}','${ext}')">
+        <div class="card-info">
+            <div class="card-name">${r.title}</div>
+            <div class="card-sub">
+                <span class="badge ${bClass}">${ext.toUpperCase()}</span>
+                <span class="card-size">${r.size}</span>
+            </div>
+        </div>
+        <div class="card-right">
+            <div class="seeders">▲ ${r.seeders}</div>
+            <div class="leechers">▼ ${r.leechers}</div>
+        </div>
+    </div>`;
+}
+
+// ── Play ──────────────────────────────────────────────────────────────────────
+async function play(encodedTorrentUrl, encodedName, ext) {
+    const name       = decodeURIComponent(encodedName);
+    const torrentUrl = decodeURIComponent(encodedTorrentUrl);
+
+    openOverlay(name);
+
+    // Android WebView handles MKV/HEVC natively via hardware decoder
+
+    setMsg('// PARSING .TORRENT...');
+
+    try {
+        const metaRes = await fetch(`${WORKER}/meta?torrent_url=${encodeURIComponent(torrentUrl)}`);
+        const meta    = await metaRes.json();
+
+        if (meta.error) throw new Error(meta.error);
+
+        // Find a playable webseed URL
+        const videoSeed = (meta.webseeds ?? []).find(u => /\.(mp4|mkv|webm|avi)/i.test(u));
+
+        if (videoSeed) {
+            setMsg('// WEBSEED_FOUND\n// CONNECTING...');
+            const proxyUrl = `${WORKER}/proxy?url=${encodeURIComponent(videoSeed)}`;
+            mountVideo(proxyUrl, name);
+        } else {
+            // Has webseed but no video extension — try the first one anyway
+            const anySeed = meta.webseeds?.[0];
+            if (anySeed) {
+                setMsg('// WEBSEED_FOUND (untyped)\n// ATTEMPTING PROXY...');
+                const proxyUrl = `${WORKER}/proxy?url=${encodeURIComponent(anySeed)}`;
+                mountVideo(proxyUrl, name);
+            } else {
+                setMsg(
+                    `<span class="err">// NO_WEBSEED</span>\n` +
+                    `This torrent has no direct HTTP source.\nOnly P2P peers — not streamable.\n\n` +
+                    `<span class="warn">// TIP</span>\nLook for releases from groups that\nembed webseeds (e.g. some BluRay encodes).\n` +
+                    `<span class="hint">// Files: ${meta.files?.map(f=>f.path).slice(0,2).join(', ')}</span>`
+                );
+            }
+        }
+    } catch (e) {
+        setMsg(`<span class="err">// WORKER_ERR</span>\n${e.message}\n\n<span class="hint">// Check Worker deployment</span>`);
+    }
+}
+
+// ── Mount video ───────────────────────────────────────────────────────────────
+function mountVideo(src, title) {
+    const cont = document.getElementById('player-cont');
+    cont.innerHTML = '';
+
+    const video       = document.createElement('video');
+    video.src         = src;
+    video.controls    = true;
+    video.autoplay    = true;
+    video.playsInline = true;
+    video.setAttribute('webkit-playsinline', 'true');
+    video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+
+    video.addEventListener('canplay', () => {
+        document.getElementById('ov-stats').style.display = 'none';
+    });
+
+    video.addEventListener('error', () => {
+        const proxyUrl = src;
+        const cont2 = document.getElementById('player-cont');
+        cont2.innerHTML = '';
+        const msgEl = document.createElement('div');
+        msgEl.id = 'msg';
+        msgEl.innerHTML =
+            `<span class="err">// DECODE_ERR</span>\n` +
+            `WebView codec rejected stream.\n\n` +
+            `<span class="warn">// OPEN IN EXTERNAL PLAYER</span>`;
+        cont2.appendChild(msgEl);
+
+        // MX Player intent — works on Android if MX Player installed
+        const mxBtn = document.createElement('button');
+        mxBtn.textContent = 'OPEN IN MX PLAYER';
+        mxBtn.style.cssText = 'margin:16px auto;display:block;background:var(--neon);border:none;color:#fff;padding:12px 20px;font-family:var(--font);font-weight:700;font-size:12px;cursor:pointer;';
+        mxBtn.onclick = () => {
+            window.location.href = `intent:${proxyUrl}#Intent;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(title)};end`;
+        };
+        cont2.appendChild(mxBtn);
+
+        // VLC fallback
+        const vlcBtn = document.createElement('button');
+        vlcBtn.textContent = 'OPEN IN VLC';
+        vlcBtn.style.cssText = 'margin:4px auto 16px;display:block;background:#222;border:1px solid #444;color:#aaa;padding:10px 20px;font-family:var(--font);font-size:12px;cursor:pointer;';
+        vlcBtn.onclick = () => {
+            window.location.href = `vlc://${proxyUrl.replace(/^https?:\/\//, '')}`;
+        };
+        cont2.appendChild(vlcBtn);
+    });
+
+    video.addEventListener('waiting', () => {
+        const stats = document.getElementById('ov-stats');
+        stats.textContent = 'BUFFERING...';
+        stats.style.display = 'block';
+    });
+
+    video.addEventListener('playing', () => {
+        document.getElementById('ov-stats').style.display = 'none';
+    });
+
+    cont.appendChild(video);
+    document.getElementById('v-name').textContent = title;
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function openOverlay(name) {
+    document.getElementById('overlay').classList.add('active');
+    document.getElementById('v-name').textContent = name;
+    document.getElementById('player-cont').innerHTML = '<div id="msg"></div>';
+    document.getElementById('ov-stats').style.display = 'none';
+    document.body.style.overflow = 'hidden';
+}
+
+function setMsg(html) {
+    let el = document.getElementById('msg');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'msg';
+        document.getElementById('player-cont').appendChild(el);
+    }
+    el.innerHTML = html;
+}
+
+function closeOverlay() {
+    document.getElementById('overlay').classList.remove('active');
+    document.getElementById('player-cont').innerHTML = '';
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+
+// ── Auto-search on load ───────────────────────────────────────────────────────
+document.getElementById('query').value = 'SubsPlease 1080p';
+
+doSearch();
+</script>
+</body>
+</html>
