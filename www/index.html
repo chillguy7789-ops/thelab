@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>THE LAB</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
     <style>
         :root {
             --neon: #ff0055;
@@ -20,100 +21,29 @@
         html, body { height: 100%; }
         body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; display: flex; flex-direction: column; }
 
-        /* ── Header ── */
-        .header {
-            padding: 12px 15px;
-            background: #050505;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-        }
+        .header { padding: 12px 15px; background: #050505; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
         .logo { color: var(--neon); font-weight: 700; font-size: 14px; letter-spacing: 4px; flex-shrink: 0; }
         .search-wrap { flex: 1; display: flex; gap: 6px; min-width: 0; }
-        input {
-            flex: 1;
-            min-width: 0;
-            background: #0d0d0d;
-            border: 1px solid #1e1e1e;
-            border-radius: 0;
-            color: #fff;
-            padding: 10px 12px;
-            font-family: var(--font);
-            font-size: 12px;
-            outline: none;
-            transition: border-color 0.15s;
-        }
+        input { flex: 1; min-width: 0; background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 0; color: #fff; padding: 10px 12px; font-family: var(--font); font-size: 12px; outline: none; transition: border-color 0.15s; }
         input:focus { border-color: #333; }
-        .btn {
-            background: var(--neon);
-            border: none;
-            color: #fff;
-            padding: 10px 16px;
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: opacity 0.1s;
-        }
+        .btn { background: var(--neon); border: none; color: #fff; padding: 10px 16px; font-family: var(--font); font-weight: 700; font-size: 12px; cursor: pointer; flex-shrink: 0; transition: opacity 0.1s; }
         .btn:active { opacity: 0.7; }
         .btn.dim { background: #1a1a1a; color: #555; }
 
-        /* ── Category tabs ── */
-        .cat-row {
-            display: flex;
-            gap: 0;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
+        .cat-row { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
         .cat-row::-webkit-scrollbar { display: none; }
-        .cat-btn {
-            padding: 8px 14px;
-            font-family: var(--font);
-            font-size: 10px;
-            background: none;
-            border: none;
-            border-right: 1px solid var(--border);
-            color: #444;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: color 0.15s, background 0.15s;
-        }
+        .cat-btn { padding: 8px 14px; font-family: var(--font); font-size: 10px; background: none; border: none; border-right: 1px solid var(--border); color: #444; cursor: pointer; white-space: nowrap; transition: color 0.15s, background 0.15s; }
         .cat-btn.active { color: var(--green); background: #060606; }
         .cat-btn:active { background: #0d0d0d; }
 
-        /* ── Feed ── */
         #feed { flex: 1; overflow-y: auto; }
         #feed-grid { display: grid; gap: 1px; background: var(--border); }
-        .card {
-            background: var(--card);
-            padding: 14px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            transition: background 0.1s;
-        }
+        .card { background: var(--card); padding: 14px 15px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; transition: background 0.1s; }
         .card:active { background: #111; }
         .card-info { flex: 1; min-width: 0; }
-        .card-name {
-            color: #ccc;
-            font-size: 11px;
-            line-height: 1.5;
-            margin-bottom: 5px;
-            word-break: break-word;
-        }
+        .card-name { color: #ccc; font-size: 11px; line-height: 1.5; margin-bottom: 5px; word-break: break-word; }
         .card-sub { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .badge {
-            font-size: 9px;
-            padding: 2px 5px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
+        .badge { font-size: 9px; padding: 2px 5px; font-weight: 700; letter-spacing: 1px; }
         .badge-mkv  { background: #1a0a00; color: #ff6600; border: 1px solid #2a1400; }
         .badge-mp4  { background: #001a0a; color: var(--green); border: 1px solid #002a14; }
         .badge-webm { background: #00081a; color: #00aaff; border: 1px solid #001028; }
@@ -123,74 +53,93 @@
         .seeders    { color: var(--green); font-size: 11px; font-weight: 700; }
         .leechers   { color: #ff4444; font-size: 9px; }
         .empty { padding: 30px 20px; color: #333; font-size: 12px; line-height: 2; }
-
-        /* ── Load more ── */
         #load-more-wrap { padding: 15px; display: none; }
 
         /* ── Overlay ── */
-        #overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 1000;
-            flex-direction: column;
-        }
+        #overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; flex-direction: column; }
         #overlay.active { display: flex; }
-        .ov-bar {
-            padding: 10px 12px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            background: #050505;
-            flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-        }
-        #v-name {
-            flex: 1;
-            font-size: 10px;
-            color: var(--neon);
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        #player-cont {
-            flex: 1;
-            position: relative;
-            display: flex;
-            background: #000;
-            overflow: hidden;
-        }
-        #player-cont video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        #msg {
-            margin: auto;
-            font-size: 11px;
-            color: var(--green);
-            text-align: center;
-            line-height: 2.2;
-            padding: 24px;
-            white-space: pre-line;
-            max-width: 340px;
-        }
+        .ov-bar { padding: 10px 12px; display: flex; gap: 8px; align-items: center; background: #050505; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+        #v-name { flex: 1; font-size: 10px; color: var(--neon); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        #player-cont { flex: 1; position: relative; display: flex; background: #000; overflow: hidden; }
+        #player-cont video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+        #msg { margin: auto; font-size: 11px; color: var(--green); text-align: center; line-height: 2.2; padding: 24px; white-space: pre-line; max-width: 340px; }
         #msg .err  { color: var(--neon); }
         #msg .warn { color: var(--yellow); }
         #msg .hint { color: #444; font-size: 10px; margin-top: 8px; display: block; }
-        .ov-stats {
+
+        /* ── Custom player controls ── */
+        #ctrl-overlay {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.88);
-            padding: 4px 8px;
-            border: 1px solid #1e1e1e;
-            color: var(--green);
-            font-size: 10px;
-            pointer-events: none;
-            z-index: 10;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            cursor: pointer;
         }
+        #ctrl-gradient {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 130px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            pointer-events: none;
+        }
+        #ctrl-center-btn {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px; height: 60px;
+            background: rgba(255,0,85,0.9);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #fff;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            border-radius: 0;
+        }
+        #ctrl-center-btn.flash { opacity: 1; }
+        #ctrl-bar {
+            position: relative;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px 18px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #ctrl-bar.visible { opacity: 1; }
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: var(--font);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 6px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .ctrl-time { color: #aaa; font-size: 10px; font-family: var(--font); flex-shrink: 0; white-space: nowrap; min-width: 36px; text-align: center; }
+        #seek-bar {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: #444;
+            outline: none;
+            cursor: pointer;
+            border-radius: 0;
+        }
+        #seek-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            background: var(--neon);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #seek-bar::-webkit-slider-runnable-track { background: #444; }
     </style>
 </head>
 <body>
@@ -210,7 +159,7 @@
 
 <div id="feed">
     <div id="feed-grid">
-        <div class="empty">// READY<br>// SEARCH POWERED BY NYAA.SI<br>// ALL REQUESTS ROUTE THROUGH YOUR WORKER</div>
+        <div class="empty">// READY<br>// SEARCH POWERED BY NYAA.SI<br>// STREAMS VIA ANIWATCH API</div>
     </div>
     <div id="load-more-wrap">
         <button class="btn dim" style="width:100%;" onclick="loadMore()">LOAD MORE</button>
@@ -225,7 +174,6 @@
     <div id="player-cont">
         <div id="msg">INITIALIZING...</div>
     </div>
-    <div id="ov-stats" class="ov-stats" style="display:none;"></div>
 </div>
 
 <script>
@@ -233,11 +181,12 @@
 const WORKER = 'https://tiny-fire-3903.zaidmir129.workers.dev';
 // ─────────────────────────────────────────────────────────────────────────────
 
-let currentCat  = 'anime_eng';
-let currentPage = 1;
+let currentCat   = 'anime_eng';
+let currentPage  = 1;
 let currentQuery = '';
-let isLoading   = false;
-
+let isLoading    = false;
+let hlsInstance  = null;
+let ctrlTimer    = null;
 
 // ── Category ──────────────────────────────────────────────────────────────────
 function setCat(btn) {
@@ -265,43 +214,30 @@ async function loadMore() {
 async function fetchResults(replace) {
     if (isLoading) return;
     isLoading = true;
-
     const grid = document.getElementById('feed-grid');
     const lmw  = document.getElementById('load-more-wrap');
-
-    if (replace) {
-        grid.innerHTML = `<div class="empty">// SEARCHING ANIMETOSHO...</div>`;
-        lmw.style.display = 'none';
-    }
-
+    if (replace) { grid.innerHTML = `<div class="empty">// SEARCHING...</div>`; lmw.style.display = 'none'; }
     try {
         const res  = await fetch(`${WORKER}/search?q=${encodeURIComponent(currentQuery)}&page=${currentPage}&cat=${currentCat}`);
         const data = await res.json();
-
         if (data.error) throw new Error(data.error);
         const results = data.results ?? [];
-
-        if (!results.length && replace) {
-            grid.innerHTML = `<div class="empty">// NO_RESULTS</div>`;
-            isLoading = false; return;
-        }
-
+        if (!results.length && replace) { grid.innerHTML = `<div class="empty">// NO_RESULTS</div>`; isLoading = false; return; }
         if (replace) grid.innerHTML = '';
         grid.insertAdjacentHTML('beforeend', results.map(r => renderCard(r)).join(''));
         lmw.style.display = results.length >= 10 ? 'block' : 'none';
     } catch (e) {
         if (replace) grid.innerHTML = `<div class="empty"><span style="color:var(--neon)">// ERR: ${e.message}</span></div>`;
     }
-
     isLoading = false;
 }
 
 function renderCard(r) {
-    const ext   = r.ext || 'mkv';
+    const ext    = r.ext || 'mkv';
     const bClass = ext === 'mp4' ? 'badge-mp4' : ext === 'webm' ? 'badge-webm' : ext === 'mkv' ? 'badge-mkv' : 'badge-unk';
-    const safe  = r.title.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-    const tUrl  = encodeURIComponent(r.torrentUrl);
-    const iHash = encodeURIComponent(r.infoHash || '');
+    const safe   = r.title.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    const tUrl   = encodeURIComponent(r.torrentUrl);
+    const iHash  = encodeURIComponent(r.infoHash || '');
     return `
     <div class="card" onclick="play('${tUrl}','${encodeURIComponent(safe)}','${ext}','${iHash}')">
         <div class="card-info">
@@ -312,119 +248,219 @@ function renderCard(r) {
             </div>
         </div>
         <div class="card-right">
-            <div class="seeders">▲ ${r.seeders}</div>
-            <div class="leechers">▼ ${r.leechers}</div>
+            <div class="seeders">&#9650; ${r.seeders}</div>
+            <div class="leechers">&#9660; ${r.leechers}</div>
         </div>
     </div>`;
 }
 
-// ── Play ──────────────────────────────────────────────────────────────────────
+// ── Parse nyaa title -> anime name + episode number ───────────────────────────
+function parseTorrentTitle(raw) {
+    // Strip file extension
+    let s = raw.replace(/\.[a-z]{2,4}$/i, '');
+    // Strip leading [Group] tag
+    s = s.replace(/^\s*\[[^\]]*\]\s*/, '').trim();
+    // Match episode number: "- 06", "- 1155", "- 06v2" followed by space/bracket/paren
+    const epMatch = s.match(/[-\u2013]\s*(\d{1,4})(?:v\d+)?\s*(?:[\[(]|$)/);
+    const ep = epMatch ? parseInt(epMatch[1]) : null;
+    // Anime name = everything before the episode dash
+    let animeName = epMatch ? s.slice(0, epMatch.index).trim() : s.replace(/\s*[\[(].*$/, '').trim();
+    // Remove trailing season tag for search (S2 -> search base name, aniwatch has separate entries)
+    // Keep S2 in name since aniwatch might need it
+    return { animeName, ep };
+}
+
+// ── Play: resolve via aniwatch API then mount HLS ─────────────────────────────
 async function play(encodedTorrentUrl, encodedName, ext, encodedHash) {
-    const name       = decodeURIComponent(encodedName);
-    const torrentUrl = decodeURIComponent(encodedTorrentUrl);
-
+    const name = decodeURIComponent(encodedName);
     openOverlay(name);
+    setMsg('// RESOLVING STREAM...');
 
-    // Android WebView handles MKV/HEVC natively via hardware decoder
-
-    setMsg('// PARSING .TORRENT...');
+    const { animeName, ep } = parseTorrentTitle(name);
 
     try {
-        const hash = encodedHash ? decodeURIComponent(encodedHash) : '';
-        const metaUrl = `${WORKER}/meta?torrent_url=${encodeURIComponent(torrentUrl)}` + (hash ? `&hash=${hash}` : '');
-        const metaRes = await fetch(metaUrl);
-        const meta    = await metaRes.json();
+        // 1. Search aniwatch
+        setMsg(`// SEARCHING\n${animeName}`);
+        const searchRes = await fetch(`${WORKER}/anime/api/v2/hianime/search?q=${encodeURIComponent(animeName)}&page=1`);
+        if (!searchRes.ok) throw new Error(`search_${searchRes.status}`);
+        const searchData = await searchRes.json();
 
-        if (meta.error) throw new Error(meta.error);
+        const animes = searchData.data?.animes ?? [];
+        if (!animes.length) throw new Error('ANIME_NOT_FOUND');
+        const anime = animes[0];
 
-        // Find a playable webseed URL
-        const videoSeed = (meta.webseeds ?? []).find(u => /\.(mp4|mkv|webm|avi)/i.test(u));
+        // 2. Get episode list
+        setMsg(`// ${anime.name}\n// LOADING EPISODES...`);
+        const epRes = await fetch(`${WORKER}/anime/api/v2/hianime/anime/${anime.id}/episodes`);
+        if (!epRes.ok) throw new Error(`episodes_${epRes.status}`);
+        const epData  = await epRes.json();
+        const episodes = epData.data?.episodes ?? [];
+        if (!episodes.length) throw new Error('NO_EPISODES');
 
-        if (videoSeed) {
-            setMsg('// WEBSEED_FOUND\n// CONNECTING...');
-            const proxyUrl = `${WORKER}/proxy?url=${encodeURIComponent(videoSeed)}`;
-            mountVideo(proxyUrl, name);
-        } else {
-            // Has webseed but no video extension — try the first one anyway
-            const anySeed = meta.webseeds?.[0];
-            if (anySeed) {
-                setMsg('// WEBSEED_FOUND (untyped)\n// ATTEMPTING PROXY...');
-                const proxyUrl = `${WORKER}/proxy?url=${encodeURIComponent(anySeed)}`;
-                mountVideo(proxyUrl, name);
-            } else {
-                setMsg(
-                    `<span class="err">// NO_WEBSEED</span>\n` +
-                    `This torrent has no direct HTTP source.\nOnly P2P peers — not streamable.\n\n` +
-                    `<span class="warn">// TIP</span>\nLook for releases from groups that\nembed webseeds (e.g. some BluRay encodes).\n` +
-                    `<span class="hint">// Files: ${meta.files?.map(f=>f.path).slice(0,2).join(', ')}</span>`
-                );
-            }
-        }
+        // Find matching episode by number, fallback to first
+        const episode = (ep != null ? episodes.find(e => e.number === ep) : null) ?? episodes[0];
+
+        // 3. Get stream sources
+        setMsg(`// EP ${episode.number}\n// FETCHING STREAM...`);
+        const srcRes = await fetch(
+            `${WORKER}/anime/api/v2/hianime/episode/sources?animeEpisodeId=${encodeURIComponent(episode.episodeId)}&server=vidstreaming&category=sub`
+        );
+        if (!srcRes.ok) throw new Error(`sources_${srcRes.status}`);
+        const srcData = await srcRes.json();
+
+        const sources = srcData.data?.sources ?? [];
+        // Prefer HLS source
+        const source = sources.find(s => s.type === 'hls') ?? sources[0];
+        if (!source?.url) throw new Error('NO_STREAM_URL');
+
+        mountVideo(source.url, name);
+
     } catch (e) {
-        setMsg(`<span class="err">// WORKER_ERR</span>\n${e.message}\n\n<span class="hint">// Check Worker deployment</span>`);
+        setMsg(`<span class="err">// ERR</span>\n${e.message}\n\n<span class="hint">// ${animeName}${ep != null ? ' ep ' + ep : ''}</span>`);
     }
 }
 
-// ── Mount video ───────────────────────────────────────────────────────────────
+// ── Custom HLS player ─────────────────────────────────────────────────────────
 function mountVideo(src, title) {
+    if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+    clearTimeout(ctrlTimer);
+
     const cont = document.getElementById('player-cont');
     cont.innerHTML = '';
 
-    const video       = document.createElement('video');
-    video.src         = src;
-    video.controls    = true;
-    video.autoplay    = true;
+    // Video element
+    const video = document.createElement('video');
+    video.id = 'vid';
     video.playsInline = true;
     video.setAttribute('webkit-playsinline', 'true');
-    video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-
-    video.addEventListener('canplay', () => {
-        document.getElementById('ov-stats').style.display = 'none';
-    });
-
-    video.addEventListener('error', () => {
-        const proxyUrl = src;
-        const cont2 = document.getElementById('player-cont');
-        cont2.innerHTML = '';
-        const msgEl = document.createElement('div');
-        msgEl.id = 'msg';
-        msgEl.innerHTML =
-            `<span class="err">// DECODE_ERR</span>\n` +
-            `WebView codec rejected stream.\n\n` +
-            `<span class="warn">// OPEN IN EXTERNAL PLAYER</span>`;
-        cont2.appendChild(msgEl);
-
-        // MX Player intent — works on Android if MX Player installed
-        const mxBtn = document.createElement('button');
-        mxBtn.textContent = 'OPEN IN MX PLAYER';
-        mxBtn.style.cssText = 'margin:16px auto;display:block;background:var(--neon);border:none;color:#fff;padding:12px 20px;font-family:var(--font);font-weight:700;font-size:12px;cursor:pointer;';
-        mxBtn.onclick = () => {
-            window.location.href = `intent:${proxyUrl}#Intent;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(title)};end`;
-        };
-        cont2.appendChild(mxBtn);
-
-        // VLC fallback
-        const vlcBtn = document.createElement('button');
-        vlcBtn.textContent = 'OPEN IN VLC';
-        vlcBtn.style.cssText = 'margin:4px auto 16px;display:block;background:#222;border:1px solid #444;color:#aaa;padding:10px 20px;font-family:var(--font);font-size:12px;cursor:pointer;';
-        vlcBtn.onclick = () => {
-            window.location.href = `vlc://${proxyUrl.replace(/^https?:\/\//, '')}`;
-        };
-        cont2.appendChild(vlcBtn);
-    });
-
-    video.addEventListener('waiting', () => {
-        const stats = document.getElementById('ov-stats');
-        stats.textContent = 'BUFFERING...';
-        stats.style.display = 'block';
-    });
-
-    video.addEventListener('playing', () => {
-        document.getElementById('ov-stats').style.display = 'none';
-    });
-
     cont.appendChild(video);
+
+    // Controls overlay
+    const ctrlHTML = `
+        <div id="ctrl-overlay">
+            <div id="ctrl-gradient"></div>
+            <div id="ctrl-center-btn">&#9654;</div>
+            <div id="ctrl-bar">
+                <button class="ctrl-btn" id="play-btn" onclick="togglePlay(event)">&#9654;</button>
+                <span class="ctrl-time" id="curr-time">0:00</span>
+                <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1" onclick="stopProp(event)" oninput="onSeek(event)">
+                <span class="ctrl-time" id="dur-time">--:--</span>
+                <button class="ctrl-btn" onclick="toggleFS(event)">&#x26F6;</button>
+            </div>
+        </div>`;
+    cont.insertAdjacentHTML('beforeend', ctrlHTML);
+
+    document.getElementById('ctrl-overlay').addEventListener('click', handleCtrlTap);
+
+    // Video events
+    video.addEventListener('play',  () => { setPlayBtn('&#9646;&#9646;'); });
+    video.addEventListener('pause', () => { setPlayBtn('&#9654;'); });
+    video.addEventListener('waiting', () => { setPlayBtn('...'); });
+    video.addEventListener('timeupdate', () => {
+        if (!video.duration) return;
+        const seekBar = document.getElementById('seek-bar');
+        if (seekBar) seekBar.value = (video.currentTime / video.duration) * 100;
+        const ct = document.getElementById('curr-time');
+        if (ct) ct.textContent = formatTime(video.currentTime);
+    });
+    video.addEventListener('loadedmetadata', () => {
+        const dt = document.getElementById('dur-time');
+        if (dt) dt.textContent = formatTime(video.duration);
+    });
+
     document.getElementById('v-name').textContent = title;
+
+    // HLS setup
+    if (Hls.isSupported()) {
+        hlsInstance = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60 });
+        hlsInstance.loadSource(src);
+        hlsInstance.attachMedia(video);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(() => {});
+            showControls();
+        });
+        hlsInstance.on(Hls.Events.ERROR, (_, data) => {
+            if (data.fatal) setMsg(`<span class="err">// HLS_ERR</span>\n${data.details}`);
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS (Safari)
+        video.src = src;
+        video.play().catch(() => {});
+        showControls();
+    } else {
+        setMsg('<span class="err">// HLS_NOT_SUPPORTED</span>\nBrowser cannot play HLS streams.');
+    }
+}
+
+function setPlayBtn(html) {
+    const btn = document.getElementById('play-btn');
+    const ctr = document.getElementById('ctrl-center-btn');
+    if (btn) btn.innerHTML = html;
+    if (ctr) ctr.innerHTML = html;
+}
+
+function handleCtrlTap(e) {
+    // Don't intercept control bar interactions
+    if (e.target.closest('#ctrl-bar')) return;
+    const bar = document.getElementById('ctrl-bar');
+    if (!bar) return;
+    if (bar.classList.contains('visible')) {
+        togglePlay(e);
+        // flash center
+        const ctr = document.getElementById('ctrl-center-btn');
+        if (ctr) { ctr.classList.add('flash'); setTimeout(() => ctr.classList.remove('flash'), 350); }
+        hideControls();
+    } else {
+        showControls();
+    }
+}
+
+function showControls() {
+    const bar = document.getElementById('ctrl-bar');
+    if (!bar) return;
+    bar.classList.add('visible');
+    clearTimeout(ctrlTimer);
+    ctrlTimer = setTimeout(hideControls, 3500);
+}
+
+function hideControls() {
+    const bar = document.getElementById('ctrl-bar');
+    if (bar) bar.classList.remove('visible');
+}
+
+function togglePlay(e) {
+    if (e) e.stopPropagation();
+    const video = document.getElementById('vid');
+    if (!video) return;
+    video.paused ? video.play() : video.pause();
+    showControls();
+}
+
+function toggleFS(e) {
+    if (e) e.stopPropagation();
+    const cont = document.getElementById('player-cont');
+    if (!document.fullscreenElement) {
+        (cont.requestFullscreen || cont.webkitRequestFullscreen).call(cont);
+    } else {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    }
+    showControls();
+}
+
+function onSeek(e) {
+    e.stopPropagation();
+    const video = document.getElementById('vid');
+    if (video && video.duration) video.currentTime = (e.target.value / 100) * video.duration;
+    showControls();
+}
+
+function stopProp(e) { e.stopPropagation(); }
+
+function formatTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m   = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
@@ -432,7 +468,6 @@ function openOverlay(name) {
     document.getElementById('overlay').classList.add('active');
     document.getElementById('v-name').textContent = name;
     document.getElementById('player-cont').innerHTML = '<div id="msg"></div>';
-    document.getElementById('ov-stats').style.display = 'none';
     document.body.style.overflow = 'hidden';
 }
 
@@ -447,6 +482,8 @@ function setMsg(html) {
 }
 
 function closeOverlay() {
+    if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+    clearTimeout(ctrlTimer);
     document.getElementById('overlay').classList.remove('active');
     document.getElementById('player-cont').innerHTML = '';
     document.body.style.overflow = '';
@@ -456,7 +493,6 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay
 
 // ── Auto-search on load ───────────────────────────────────────────────────────
 document.getElementById('query').value = 'SubsPlease 1080p';
-
 doSearch();
 </script>
 </body>
