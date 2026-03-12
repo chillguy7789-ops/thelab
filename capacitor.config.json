@@ -1,0 +1,19 @@
+{
+  "appId": "com.thelab.stream",
+  "appName": "THE LAB",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "cleartext": true,
+    "allowNavigation": [
+      "*.workers.dev",
+      "feed.animetosho.org",
+      "animetosho.org",
+      "nyaa.si"
+    ]
+  }
+}
