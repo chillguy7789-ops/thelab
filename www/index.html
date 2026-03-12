@@ -301,8 +301,9 @@ function renderCard(r) {
     const bClass = ext === 'mp4' ? 'badge-mp4' : ext === 'webm' ? 'badge-webm' : ext === 'mkv' ? 'badge-mkv' : 'badge-unk';
     const safe  = r.title.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
     const tUrl  = encodeURIComponent(r.torrentUrl);
+    const iHash = encodeURIComponent(r.infoHash || '');
     return `
-    <div class="card" onclick="play('${tUrl}','${encodeURIComponent(safe)}','${ext}')">
+    <div class="card" onclick="play('${tUrl}','${encodeURIComponent(safe)}','${ext}','${iHash}')">
         <div class="card-info">
             <div class="card-name">${r.title}</div>
             <div class="card-sub">
@@ -318,7 +319,7 @@ function renderCard(r) {
 }
 
 // ── Play ──────────────────────────────────────────────────────────────────────
-async function play(encodedTorrentUrl, encodedName, ext) {
+async function play(encodedTorrentUrl, encodedName, ext, encodedHash) {
     const name       = decodeURIComponent(encodedName);
     const torrentUrl = decodeURIComponent(encodedTorrentUrl);
 
@@ -329,7 +330,9 @@ async function play(encodedTorrentUrl, encodedName, ext) {
     setMsg('// PARSING .TORRENT...');
 
     try {
-        const metaRes = await fetch(`${WORKER}/meta?torrent_url=${encodeURIComponent(torrentUrl)}`);
+        const hash = encodedHash ? decodeURIComponent(encodedHash) : '';
+        const metaUrl = `${WORKER}/meta?torrent_url=${encodeURIComponent(torrentUrl)}` + (hash ? `&hash=${hash}` : '');
+        const metaRes = await fetch(metaUrl);
         const meta    = await metaRes.json();
 
         if (meta.error) throw new Error(meta.error);
